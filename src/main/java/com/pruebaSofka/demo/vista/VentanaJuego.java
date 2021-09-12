@@ -13,7 +13,6 @@ import com.pruebaSofka.demo.repositorios.RepositorioUsuario;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.hibernate.engine.jdbc.Size;
 
 public class VentanaJuego extends javax.swing.JFrame {
 
@@ -21,18 +20,22 @@ public class VentanaJuego extends javax.swing.JFrame {
     RepositorioCategoria repositorioCategoria;
     RepositorioRespuesta repositorioRespuesta;
     RepositorioUsuario repositorioUsuario;
-    
+
     List<Pregunta> preguntasNivel1 = new ArrayList<Pregunta>();
     List<Pregunta> preguntasNivel2 = new ArrayList<Pregunta>();
     List<Pregunta> preguntasNivel3 = new ArrayList<Pregunta>();
     List<Pregunta> preguntasNivel4 = new ArrayList<Pregunta>();
     List<Pregunta> preguntasNivel5 = new ArrayList<Pregunta>();
-    
+    List<List<Pregunta>> listaPreguntas = new ArrayList<List<Pregunta>>();
+
     Pregunta preguntaMomento;
     int opcionSeleccionada;
+    int ronda;
+    Usuario jugador;
+    boolean esJuegoActivo;
 
     public VentanaJuego() {
-        
+
         JuegoApplication.iniciarSpring();
         repositorioPregunta = SpringContext.getBean(RepositorioPregunta.class);
         repositorioCategoria = SpringContext.getBean(RepositorioCategoria.class);
@@ -54,6 +57,7 @@ public class VentanaJuego extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        grupoUno = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
@@ -128,6 +132,7 @@ public class VentanaJuego extends javax.swing.JFrame {
 
         campoPregunta.setText("Para Comenzar presione Iniciar");
 
+        grupoUno.add(respuestaUno);
         respuestaUno.setText("...");
         respuestaUno.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -135,6 +140,7 @@ public class VentanaJuego extends javax.swing.JFrame {
             }
         });
 
+        grupoUno.add(respuestaDos);
         respuestaDos.setText("...");
         respuestaDos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -142,6 +148,7 @@ public class VentanaJuego extends javax.swing.JFrame {
             }
         });
 
+        grupoUno.add(respuestaTres);
         respuestaTres.setText("...");
         respuestaTres.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -149,6 +156,7 @@ public class VentanaJuego extends javax.swing.JFrame {
             }
         });
 
+        grupoUno.add(respuestaCuatro);
         respuestaCuatro.setText("...");
         respuestaCuatro.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -511,86 +519,108 @@ public class VentanaJuego extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonAgregarPreguntaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAgregarPreguntaActionPerformed
-        
-        String enunciadoNuevo;
-        String op1Nueva, op2Nueva, op3Nueva, op4Nueva;
-        int respuestaNueva;
-        Categoria categoriaNuevo;
-        enunciadoNuevo = campoPreguntaNueva.getText();
-        op1Nueva = campoOp1Nuevo.getText();
-        op2Nueva = campoOp2Nuevo.getText();
-        op3Nueva = campoOp3Nuevo.getText();
-        op4Nueva = campoOp4Nuevo.getText();
-        respuestaNueva = selectorRespuesta.getSelectedIndex();
+        if (campoPreguntaNueva.getText().isEmpty() || (selectorRespuesta.getSelectedIndex() == 0) || (selectorNivel.getSelectedIndex() == 0)) {
+            JOptionPane.showMessageDialog(null, "Falta Información");
+        } else {
+            String enunciadoNuevo;
+            String op1Nueva, op2Nueva, op3Nueva, op4Nueva;
+            int respuestaNueva;
+            Categoria categoriaNuevo;
+            enunciadoNuevo = campoPreguntaNueva.getText();
+            op1Nueva = campoOp1Nuevo.getText();
+            op2Nueva = campoOp2Nuevo.getText();
+            op3Nueva = campoOp3Nuevo.getText();
+            op4Nueva = campoOp4Nuevo.getText();
+            respuestaNueva = selectorRespuesta.getSelectedIndex();
 
-        categoriaNuevo = repositorioCategoria.getById(selectorNivel.getSelectedIndex());
-        Pregunta preguntaNueva = new Pregunta(enunciadoNuevo, op1Nueva, op2Nueva, op3Nueva, op4Nueva, respuestaNueva, categoriaNuevo);
-        repositorioPregunta.save(preguntaNueva);
-        mensajePregunta.setText("Agregada Correctamente");
-        LimpiarConfiguracion();
-        
+            categoriaNuevo = repositorioCategoria.getById(selectorNivel.getSelectedIndex());
+            Pregunta preguntaNueva = new Pregunta(enunciadoNuevo, op1Nueva, op2Nueva, op3Nueva, op4Nueva, respuestaNueva, categoriaNuevo);
+            repositorioPregunta.save(preguntaNueva);
+            mensajePregunta.setText("Agregada Correctamente");
+            LimpiarConfiguracion();
+        }
 
     }//GEN-LAST:event_botonAgregarPreguntaActionPerformed
 
     private void botonIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonIniciarActionPerformed
-        try{
-        String nombreJugador;
-        Long cedula;
-        nombreJugador=campoNombre.getText();
-        cedula=Long.parseLong(campoCedula.getText());
-        Usuario jugador =new Usuario(cedula,nombreJugador,0,0);
-        repositorioUsuario.save(jugador);
-        iniciarPregunta(preguntasNivel1);
-        campoPuntaje.setText("0");
-        nivelActual.setText("Iniciante");
-        botonAbandonar.setEnabled(true);
-        botonResponder.setEnabled(true);
-        botonIniciar.setEnabled(false);
-        
-        }catch (NumberFormatException e) {
+        try {
+            String nombreJugador;
+            Long cedula;
+            nombreJugador = campoNombre.getText();
+            cedula = Long.parseLong(campoCedula.getText());
+            
+            //Se agregan las listas de preguntas a una lista de listas, para permitir iteración
+            listaPreguntas.add(this.preguntasNivel1);
+            listaPreguntas.add(this.preguntasNivel2);
+            listaPreguntas.add(this.preguntasNivel3);
+            listaPreguntas.add(this.preguntasNivel4);
+            listaPreguntas.add(this.preguntasNivel5);
+            
+            jugador = new Usuario(cedula, nombreJugador, 0, 0);
+            repositorioUsuario.save(jugador);
+            esJuegoActivo = true;
+            ronda = 0;
+            this.jugarRonda(ronda);
+
+        } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Datos NO Validos");
             JOptionPane.showMessageDialog(null, "Ingrese Nombre y Cedula");
         }
     }//GEN-LAST:event_botonIniciarActionPerformed
 
+    private void jugarRonda(int ronda) {
+        //método para refrescar la pantalla para cada ronda
+        List preguntasNivel = listaPreguntas.get(ronda);
+        iniciarPregunta(preguntasNivel);
+        campoPuntaje.setText(Integer.toString(jugador.getPuntaje()));
+        nivelActual.setText(Integer.toString(jugador.getNivel() + 1));
+        botonAbandonar.setEnabled(true);
+        botonResponder.setEnabled(true);
+        botonIniciar.setEnabled(false);
+    }
+
     private void respuestaUnoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_respuestaUnoActionPerformed
         // TODO add your handling code here:
-        respuestaDos.setEnabled(false);
-        respuestaTres.setEnabled(false);
-        respuestaCuatro.setEnabled(false);
-        opcionSeleccionada=1;
+        opcionSeleccionada = 1;
     }//GEN-LAST:event_respuestaUnoActionPerformed
 
     private void botonResponderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonResponderActionPerformed
         // TODO add your handling code here:
-        if(preguntaMomento.getRespuesta()==opcionSeleccionada){
+        Categoria categoriaPregunta = preguntaMomento.getCategoria();
+        int puntosPregunta = categoriaPregunta.getPremio();
+        // En caso de responder bien, se actualiza el puntaje y el nivel del jugador
+        // Agregar otras acciones requeridas si contesta bien y si contesta mal
+        // Revisar qué se requiere hacer para finalizar el juego
+        if (preguntaMomento.getRespuesta() == opcionSeleccionada) {
             System.out.println("Correcto");
-        }else{
-            System.out.println("Incorrecto");}
+            jugador.setPuntaje(jugador.getPuntaje() + puntosPregunta);
+            jugador.setNivel(jugador.getNivel() + 1);
+            repositorioUsuario.save(jugador);
+            ronda++;
+            if (ronda == 5) {
+                esJuegoActivo = false;
+                ronda = 0;
+            } else {
+                this.jugarRonda(ronda);
+            }
+        } else {
+            System.out.println("Incorrecto");
+        }
     }//GEN-LAST:event_botonResponderActionPerformed
 
     private void respuestaDosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_respuestaDosActionPerformed
         // TODO add your handling code here:
-        respuestaUno.setEnabled(false);
-        respuestaTres.setEnabled(false);
-        respuestaCuatro.setEnabled(false);
-        opcionSeleccionada=2;
+        opcionSeleccionada = 2;
     }//GEN-LAST:event_respuestaDosActionPerformed
 
     private void respuestaTresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_respuestaTresActionPerformed
         // TODO add your handling code here:
-        respuestaDos.setEnabled(false);
-        respuestaUno.setEnabled(false);
-        respuestaCuatro.setEnabled(false);
-        opcionSeleccionada=3;
+        opcionSeleccionada = 3;
     }//GEN-LAST:event_respuestaTresActionPerformed
 
     private void respuestaCuatroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_respuestaCuatroActionPerformed
         // TODO add your handling code here:
-        respuestaDos.setEnabled(false);
-        respuestaTres.setEnabled(false);
-        respuestaUno.setEnabled(false);
-        opcionSeleccionada=4;
+        opcionSeleccionada = 4;
     }//GEN-LAST:event_respuestaCuatroActionPerformed
 
     private void botonActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonActualizarActionPerformed
@@ -598,7 +628,6 @@ public class VentanaJuego extends javax.swing.JFrame {
         llenarTabla();
     }//GEN-LAST:event_botonActualizarActionPerformed
 
-   
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -633,7 +662,7 @@ public class VentanaJuego extends javax.swing.JFrame {
     }
 
     public void OrdenarPreguntas() {
-        
+
         List<Pregunta> listapreguntas = repositorioPregunta.findAll();
         for (int i = 0; i < listapreguntas.size(); i++) {
 
@@ -653,20 +682,20 @@ public class VentanaJuego extends javax.swing.JFrame {
                 preguntasNivel5.add(listapreguntas.get(i));
             }
         }
-        
 
     }
-    
+
     public void iniciarPregunta(List<Pregunta> preguntasNivel) {
-        
-        int numeroAleatorio = (int) (Math.random() * 5) + 1;
+
+        //int numeroAleatorio = (int) (Math.random() * 5) + 1;
+        int numeroAleatorio = (int) (Math.random() * 5);
         preguntaMomento = preguntasNivel.get(numeroAleatorio);
         campoPregunta.setText(preguntaMomento.getEnunciado());
         respuestaUno.setText(preguntaMomento.getOpcion1());
         respuestaDos.setText(preguntaMomento.getOpcion2());
         respuestaTres.setText(preguntaMomento.getOpcion3());
         respuestaCuatro.setText(preguntaMomento.getOpcion4());
-        
+
         respuestaUno.setEnabled(true);
         respuestaDos.setEnabled(true);
         respuestaTres.setEnabled(true);
@@ -674,7 +703,7 @@ public class VentanaJuego extends javax.swing.JFrame {
     }
 
     public void LimpiarConfiguracion() {
-        
+
         campoPreguntaNueva.setText("");
         campoOp1Nuevo.setText("");
         campoOp2Nuevo.setText("");
@@ -684,8 +713,8 @@ public class VentanaJuego extends javax.swing.JFrame {
         selectorNivel.setSelectedIndex(0);
 
     }
-    
-     public void llenarTabla() {
+
+    public void llenarTabla() {
         List<Usuario> listaJugadores = repositorioUsuario.findAll();
         int n = listaJugadores.size();
         String nombresColomnas[] = {"Cedula", "Nombre", "Nivel", "Puntaje"};
@@ -693,9 +722,9 @@ public class VentanaJuego extends javax.swing.JFrame {
         for (int i = 0; i < n; i++) {
             data[i][0] = "" + listaJugadores.get(i).getCc();
             data[i][1] = listaJugadores.get(i).getNombre();
-            data[i][2] = ""+listaJugadores.get(i).getNivel();
+            data[i][2] = "" + listaJugadores.get(i).getNivel();
             data[i][3] = "" + listaJugadores.get(i).getPuntaje();
-            
+
         }
         tablaVisualizacion.setModel(new DefaultTableModel(data, nombresColomnas));
     }
@@ -714,6 +743,7 @@ public class VentanaJuego extends javax.swing.JFrame {
     private javax.swing.JLabel campoPregunta;
     private javax.swing.JTextField campoPreguntaNueva;
     private javax.swing.JLabel campoPuntaje;
+    private javax.swing.ButtonGroup grupoUno;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

@@ -2,11 +2,14 @@
 package com.pruebaSofka.demo.modelos;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
 public class Usuario {
     @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     int id;
     Long cc;
     String nombre;
@@ -19,6 +22,15 @@ public class Usuario {
         this.nivel = nivel;
         this.puntaje = puntaje;
     }
+
+    public Usuario(int id, Long cc, String nombre, int nivel, int puntaje) {
+        this.id = id;
+        this.cc = cc;
+        this.nombre = nombre;
+        this.nivel = nivel;
+        this.puntaje = puntaje;
+    }
+    
     public Usuario(){}
 
     public int getId() {
