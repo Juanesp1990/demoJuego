@@ -44,12 +44,7 @@ public class VentanaJuego extends javax.swing.JFrame {
 
         initComponents();
         OrdenarPreguntas();
-        botonAbandonar.setEnabled(false);
-        botonResponder.setEnabled(false);
-        respuestaUno.setEnabled(false);
-        respuestaDos.setEnabled(false);
-        respuestaTres.setEnabled(false);
-        respuestaCuatro.setEnabled(false);
+        LimpiarPregunta();
 
     }
 
@@ -99,10 +94,13 @@ public class VentanaJuego extends javax.swing.JFrame {
         selectorNivel = new javax.swing.JComboBox<>();
         botonAgregarPregunta = new javax.swing.JButton();
         mensajePregunta = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CONCURSO DE PREGUNTAS");
-        setLocation(new java.awt.Point(0, 0));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setLocation(new java.awt.Point(300, 150));
         setResizable(false);
 
         jLabel1.setText("NOMBRE: ");
@@ -172,6 +170,11 @@ public class VentanaJuego extends javax.swing.JFrame {
         });
 
         botonAbandonar.setText("ABANDONAR");
+        botonAbandonar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonAbandonarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -466,21 +469,37 @@ public class VentanaJuego extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        jLabel4.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabel4.setText("        CREAR    PREGUNTA");
+
+        jLabel7.setText("JUAN ESTEBAN PINEDA ANGEL");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel7)
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel4Layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel4Layout.createSequentialGroup()
+                            .addGap(113, 113, 113)
+                            .addComponent(jLabel4))))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(120, 120, 120)
+                .addContainerGap()
+                .addComponent(jLabel7)
+                .addGap(40, 40, 40)
+                .addComponent(jLabel4)
+                .addGap(41, 41, 41)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("CONFIGURACIÓN", jPanel4);
@@ -588,9 +607,6 @@ public class VentanaJuego extends javax.swing.JFrame {
         // TODO add your handling code here:
         Categoria categoriaPregunta = preguntaMomento.getCategoria();
         int puntosPregunta = categoriaPregunta.getPremio();
-        // En caso de responder bien, se actualiza el puntaje y el nivel del jugador
-        // Agregar otras acciones requeridas si contesta bien y si contesta mal
-        // Revisar qué se requiere hacer para finalizar el juego
         if (preguntaMomento.getRespuesta() == opcionSeleccionada) {
             System.out.println("Correcto");
             jugador.setPuntaje(jugador.getPuntaje() + puntosPregunta);
@@ -598,13 +614,23 @@ public class VentanaJuego extends javax.swing.JFrame {
             repositorioUsuario.save(jugador);
             ronda++;
             if (ronda == 5) {
+                campoPuntaje.setText(Integer.toString(jugador.getPuntaje()));
                 esJuegoActivo = false;
                 ronda = 0;
+                campoPregunta.setText("");
+                LimpiarPregunta();
+                JOptionPane.showMessageDialog(null, "FELICITACIONES GANASTE");
             } else {
                 this.jugarRonda(ronda);
             }
         } else {
             System.out.println("Incorrecto");
+            JOptionPane.showMessageDialog(null, "PERDISTE");
+            jugador.setPuntaje(0);
+            repositorioUsuario.save(jugador);
+            campoPregunta.setText("");
+            campoPuntaje.setText("0");
+            LimpiarPregunta();
         }
     }//GEN-LAST:event_botonResponderActionPerformed
 
@@ -627,6 +653,15 @@ public class VentanaJuego extends javax.swing.JFrame {
         // TODO add your handling code here:
         llenarTabla();
     }//GEN-LAST:event_botonActualizarActionPerformed
+
+    private void botonAbandonarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAbandonarActionPerformed
+        // TODO add your handling code here:
+        jugador.setPuntaje(jugador.getPuntaje());
+        repositorioUsuario.save(jugador);
+        LimpiarPregunta();
+        campoPregunta.setText(".....");
+        JOptionPane.showMessageDialog(null, "ABANDONASTE LA PARTIDA");
+    }//GEN-LAST:event_botonAbandonarActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -687,15 +722,14 @@ public class VentanaJuego extends javax.swing.JFrame {
 
     public void iniciarPregunta(List<Pregunta> preguntasNivel) {
 
-        //int numeroAleatorio = (int) (Math.random() * 5) + 1;
-        int numeroAleatorio = (int) (Math.random() * 5);
+        //generacion de numero aleatorio dependiento de preguntas x nivel
+        int numeroAleatorio = (int) (Math.random() * preguntasNivel.size());
         preguntaMomento = preguntasNivel.get(numeroAleatorio);
         campoPregunta.setText(preguntaMomento.getEnunciado());
         respuestaUno.setText(preguntaMomento.getOpcion1());
         respuestaDos.setText(preguntaMomento.getOpcion2());
         respuestaTres.setText(preguntaMomento.getOpcion3());
         respuestaCuatro.setText(preguntaMomento.getOpcion4());
-
         respuestaUno.setEnabled(true);
         respuestaDos.setEnabled(true);
         respuestaTres.setEnabled(true);
@@ -713,6 +747,20 @@ public class VentanaJuego extends javax.swing.JFrame {
         selectorNivel.setSelectedIndex(0);
 
     }
+    
+    public void LimpiarPregunta(){
+        botonAbandonar.setEnabled(false);
+        botonResponder.setEnabled(false);
+        respuestaUno.setEnabled(false);
+        respuestaDos.setEnabled(false);
+        respuestaTres.setEnabled(false);
+        respuestaCuatro.setEnabled(false);
+        respuestaUno.setText("...");
+        respuestaDos.setText("...");
+        respuestaTres.setText("...");
+        respuestaCuatro.setText("...");
+        botonIniciar.setEnabled(true);
+    }
 
     public void llenarTabla() {
         List<Usuario> listaJugadores = repositorioUsuario.findAll();
@@ -724,7 +772,6 @@ public class VentanaJuego extends javax.swing.JFrame {
             data[i][1] = listaJugadores.get(i).getNombre();
             data[i][2] = "" + listaJugadores.get(i).getNivel();
             data[i][3] = "" + listaJugadores.get(i).getPuntaje();
-
         }
         tablaVisualizacion.setModel(new DefaultTableModel(data, nombresColomnas));
     }
@@ -750,8 +797,10 @@ public class VentanaJuego extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
