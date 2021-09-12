@@ -1,5 +1,5 @@
 
-package com.misionTic.tiendaJose;
+package com.pruebaSofka.demo;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
